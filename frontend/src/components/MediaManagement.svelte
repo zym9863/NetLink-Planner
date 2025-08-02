@@ -153,62 +153,173 @@
       maximumFractionDigits: 0
     }).format(amount);
   }
+
+  // 获取评分星级
+  function getStarRating(score: number, max: number = 10) {
+    const stars = Math.round((score / max) * 5);
+    return Array(5).fill(0).map((_, i) => i < stars);
+  }
+
+  // 获取进度条颜色
+  function getProgressColor(value: number, max: number = 10) {
+    const percentage = (value / max) * 100;
+    if (percentage >= 80) return 'var(--success-500)';
+    if (percentage >= 60) return 'var(--warning-500)';
+    return 'var(--error-500)';
+  }
 </script>
 
 <div class="media-management">
-  <div class="header">
-    <h2>📊 传输介质管理</h2>
-    <button class="add-btn" onclick={openCreateForm}>
-      ➕ 添加介质
+  <!-- 页面标题 -->
+  <div class="page-header">
+    <div class="header-content">
+      <h2>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
+        </svg>
+        传输介质管理
+      </h2>
+      <p>管理和配置各种网络传输介质的技术参数</p>
+    </div>
+    
+    <button class="add-button btn-primary" onclick={openCreateForm}>
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+        <path d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"/>
+      </svg>
+      添加介质
     </button>
   </div>
 
+  <!-- 错误提示 -->
   {#if error}
-    <div class="error">
-      ❌ {error}
+    <div class="error-card">
+      <div class="error-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm-1 15v-2h2v2h-2zm0-4V7h2v6h-2z"/>
+        </svg>
+      </div>
+      <div class="error-content">
+        <h4>操作失败</h4>
+        <p>{error}</p>
+      </div>
     </div>
   {/if}
 
+  <!-- 加载状态 -->
   {#if loading}
-    <div class="loading">
-      🔄 加载中...
+    <div class="loading-container">
+      <div class="loading-spinner">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="currentColor">
+          <path d="M20 3.5a16.5 16.5 0 1016.5 16.5.75.75 0 011.5 0 18 18 0 11-18-18 .75.75 0 011.5 0z"/>
+        </svg>
+      </div>
+      <p>正在加载介质数据...</p>
     </div>
   {/if}
 
-  <div class="media-grid">
-    {#each mediaList as media (media.id)}
-      <div class="media-card {!media.isActive ? 'inactive' : ''}">
-        <div class="card-header">
-          <h3>{media.name}</h3>
-          <span class="type-badge">{MediaTypeLabels[media.type]}</span>
-        </div>
-
-        <div class="card-content">
-          <div class="specs">
-            <div class="spec-row">
-              <span>最大距离:</span>
-              <span>{media.maxDistance} km</span>
+  <!-- 介质列表 -->
+  {#if !loading}
+    <div class="media-grid">
+      {#each mediaList as media (media.id)}
+        <div class="media-card" class:inactive={!media.isActive}>
+          <!-- 卡片头部 -->
+          <div class="card-header">
+            <div class="media-icon">
+              <svg width="32" height="32" viewBox="0 0 32 32" fill="currentColor">
+                <path d="M8 8h16v16H8V8zm2 2v12h12V10H10z"/>
+                <path d="M4 4h24v24H4V4zm2 2v20h20V6H6z"/>
+              </svg>
             </div>
-            <div class="spec-row">
-              <span>最大带宽:</span>
-              <span>{media.maxBandwidth.toLocaleString()} Mbps</span>
+            <div class="media-info">
+              <h3 class="media-name">{media.name}</h3>
+              <span class="media-type">{MediaTypeLabels[media.type]}</span>
             </div>
-            <div class="spec-row">
-              <span>成本:</span>
-              <span>{formatCurrency(media.costPerKm)}/km</span>
-            </div>
-            <div class="spec-row">
-              <span>可靠性:</span>
-              <span>{media.reliability}/10</span>
-            </div>
-            <div class="spec-row">
-              <span>安装难度:</span>
-              <span>{media.installationDifficulty}/10</span>
+            <div class="status-badge" class:active={media.isActive}>
+              <div class="status-dot"></div>
+              <span>{media.isActive ? '启用' : '禁用'}</span>
             </div>
           </div>
 
-          <div class="scenarios">
-            <strong>应用场景:</strong>
+          <!-- 关键规格 -->
+          <div class="specs-overview">
+            <div class="spec-item">
+              <div class="spec-icon">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M8 0a8 8 0 100 16A8 8 0 008 0zM1.5 8a6.5 6.5 0 1113 0 6.5 6.5 0 01-13 0z"/>
+                </svg>
+              </div>
+              <div class="spec-details">
+                <span class="spec-label">距离</span>
+                <span class="spec-value">{media.maxDistance} km</span>
+              </div>
+            </div>
+            
+            <div class="spec-item">
+              <div class="spec-icon">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M8 0a8 8 0 100 16A8 8 0 008 0zM1.5 8a6.5 6.5 0 1113 0 6.5 6.5 0 01-13 0z"/>
+                </svg>
+              </div>
+              <div class="spec-details">
+                <span class="spec-label">带宽</span>
+                <span class="spec-value">{media.maxBandwidth.toLocaleString()} Mbps</span>
+              </div>
+            </div>
+            
+            <div class="spec-item">
+              <div class="spec-icon">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M8 0a8 8 0 100 16A8 8 0 008 0zM1.5 8a6.5 6.5 0 1113 0 6.5 6.5 0 01-13 0z"/>
+                </svg>
+              </div>
+              <div class="spec-details">
+                <span class="spec-label">成本</span>
+                <span class="spec-value">{formatCurrency(media.costPerKm)}/km</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 性能指标 -->
+          <div class="performance-section">
+            <h4>性能指标</h4>
+            <div class="performance-grid">
+              <div class="performance-item">
+                <span class="performance-label">可靠性</span>
+                <div class="star-rating">
+                  {#each getStarRating(media.reliability) as filled, i}
+                    <svg width="12" height="12" viewBox="0 0 12 12" class="star" class:filled>
+                      <path d="M6 1l1.5 3h3l-2.5 2 1 3L6 7.5 3 9l1-3L1.5 4h3L6 1z" fill="currentColor"/>
+                    </svg>
+                  {/each}
+                  <span class="rating-value">{media.reliability}/10</span>
+                </div>
+              </div>
+              
+              <div class="performance-item">
+                <span class="performance-label">安装难度</span>
+                <div class="progress-bar">
+                  <div class="progress-fill" 
+                       style="width: {(media.installationDifficulty / 10) * 100}%; background-color: {getProgressColor(media.installationDifficulty)}">
+                  </div>
+                  <span class="progress-value">{media.installationDifficulty}/10</span>
+                </div>
+              </div>
+              
+              <div class="performance-item">
+                <span class="performance-label">环境适应性</span>
+                <div class="progress-bar">
+                  <div class="progress-fill" 
+                       style="width: {(media.environmentalAdaptability / 10) * 100}%; background-color: {getProgressColor(media.environmentalAdaptability)}">
+                  </div>
+                  <span class="progress-value">{media.environmentalAdaptability}/10</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 应用场景 -->
+          <div class="scenarios-section">
+            <h4>应用场景</h4>
             <div class="scenario-tags">
               {#each media.applicationScenarios as scenario}
                 <span class="scenario-tag">
@@ -218,38 +329,73 @@
             </div>
           </div>
 
-          {#if media.advantages}
-            <div class="description">
-              <strong>优势:</strong> {media.advantages}
+          <!-- 描述信息 -->
+          {#if media.advantages || media.disadvantages}
+            <div class="description-section">
+              {#if media.advantages}
+                <div class="description-item advantages">
+                  <h5>
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                      <path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/>
+                    </svg>
+                    优势
+                  </h5>
+                  <p>{media.advantages}</p>
+                </div>
+              {/if}
+              
+              {#if media.disadvantages}
+                <div class="description-item disadvantages">
+                  <h5>
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                      <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+                    </svg>
+                    注意事项
+                  </h5>
+                  <p>{media.disadvantages}</p>
+                </div>
+              {/if}
             </div>
           {/if}
 
-          {#if media.disadvantages}
-            <div class="description">
-              <strong>劣势:</strong> {media.disadvantages}
-            </div>
-          {/if}
+          <!-- 操作按钮 -->
+          <div class="card-actions">
+            <button class="action-button edit" onclick={() => openEditForm(media)}>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708L4.707 14.5H1v-3.707L12.146.146zM2 11.293V13h1.707l9-9L11 2.293l-9 9z"/>
+              </svg>
+              编辑
+            </button>
+            <button class="action-button delete" onclick={() => deleteMedia(media.id)}>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4L4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118z"/>
+              </svg>
+              删除
+            </button>
+          </div>
         </div>
-
-        <div class="card-actions">
-          <button class="edit-btn" onclick={() => openEditForm(media)}>
-            ✏️ 编辑
-          </button>
-          <button class="delete-btn" onclick={() => deleteMedia(media.id)}>
-            🗑️ 删除
-          </button>
-        </div>
-      </div>
-    {/each}
-  </div>
-
-  {#if mediaList.length === 0 && !loading}
-    <div class="empty-state">
-      <p>📭 暂无传输介质数据</p>
-      <button class="add-btn" onclick={openCreateForm}>
-        添加第一个介质
-      </button>
+      {/each}
     </div>
+
+    <!-- 空状态 -->
+    {#if mediaList.length === 0}
+      <div class="empty-state">
+        <div class="empty-icon">
+          <svg width="64" height="64" viewBox="0 0 64 64" fill="currentColor">
+            <path d="M32 8C18.745 8 8 18.745 8 32s10.745 24 24 24 24-10.745 24-24S45.255 8 32 8zm0 4c11.046 0 20 8.954 20 20s-8.954 20-20 20-20-8.954-20-20 8.954-20 20-20zm-8 16a4 4 0 108 0 4 4 0 00-8 0zm12 0a4 4 0 108 0 4 4 0 00-8 0z"/>
+          </svg>
+        </div>
+        <h3>暂无传输介质数据</h3>
+        <p>系统中还没有添加任何传输介质配置</p>
+        <button class="empty-action btn-primary" onclick={openCreateForm}>
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"/>
+          </svg>
+          添加第一个介质
+        </button>
+      </div>
+    {/if}
   {/if}
 </div>
 
