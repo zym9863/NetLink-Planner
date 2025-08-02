@@ -1,0 +1,35 @@
+{
+  "name": "netlink-planner",
+  "version": "1.0.0",
+  "description": "网络链路规划师 - 智能化网络传输介质选型系统",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "dev": "concurrently \"pnpm run backend:dev\" \"pnpm run frontend:dev\"",
+    "build": "pnpm run backend:build && pnpm run frontend:build",
+    "start": "pnpm run backend:start",
+    "backend:dev": "cd backend && pnpm run start:dev",
+    "backend:build": "cd backend && pnpm run build",
+    "backend:start": "cd backend && pnpm run start:prod",
+    "frontend:dev": "cd frontend && pnpm run dev",
+    "frontend:build": "cd frontend && pnpm run build",
+    "frontend:preview": "cd frontend && pnpm run preview",
+    "test": "pnpm run backend:test",
+    "backend:test": "cd backend && pnpm run test",
+    "lint": "pnpm run backend:lint",
+    "backend:lint": "cd backend && pnpm run lint",
+    "install:all": "pnpm install && cd backend && pnpm install && cd ../frontend && pnpm install"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "author": "",
+  "license": "MIT"
+}
