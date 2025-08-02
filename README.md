@@ -1,5 +1,7 @@
 # NetLink Planner
 
+**中文 | [English](README_EN.md)**
+
 **网络链路规划师 - 智能化网络传输介质选型系统**
 
 ## 项目简介
