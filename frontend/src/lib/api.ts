@@ -1,13 +1,60 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:3000';
+// 根据环境自动选择API地址
+const getApiBaseUrl = () => {
+  // 在生产环境中检查当前域名
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    if (hostname === 'netlink-planner.pages.dev' || hostname.includes('pages.dev')) {
+      return 'https://netlink-planner.onrender.com';
+    }
+  }
+  
+  // 检查环境变量
+  if (import.meta.env.VITE_API_BASE_URL) {
+    return import.meta.env.VITE_API_BASE_URL;
+  }
+  
+  // 默认本地开发环境
+  return 'http://localhost:3000';
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true, // 支持跨域Cookie
 });
+
+// 调试信息
+console.log('API Base URL:', API_BASE_URL);
+
+// 添加请求拦截器，用于调试
+api.interceptors.request.use(
+  (config) => {
+    console.log('发起请求:', config.method?.toUpperCase(), config.url);
+    return config;
+  },
+  (error) => {
+    console.error('请求错误:', error);
+    return Promise.reject(error);
+  }
+);
+
+// 添加响应拦截器，用于调试
+api.interceptors.response.use(
+  (response) => {
+    console.log('收到响应:', response.status, response.config.url);
+    return response;
+  },
+  (error) => {
+    console.error('响应错误:', error.response?.status, error.config?.url, error.message);
+    return Promise.reject(error);
+  }
+);
 
 // 传输介质相关接口
 export interface Media {

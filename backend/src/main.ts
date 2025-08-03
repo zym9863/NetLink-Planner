@@ -15,9 +15,16 @@ async function bootstrap() {
 
   // 启用CORS
   app.enableCors({
-    origin: ['http://localhost:5173', 'http://localhost:3000'],
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+    origin: [
+      'http://localhost:5173', 
+      'http://localhost:3000',
+      'https://netlink-planner.pages.dev',
+      'https://netlink-planner.onrender.com'
+    ],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+    optionsSuccessStatus: 200, // 为旧版浏览器提供支持
   });
 
   // 配置Swagger文档
