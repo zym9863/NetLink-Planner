@@ -12,13 +12,13 @@
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^6.0.0",
     "@tsconfig/svelte": "^5.0.4",
-    "svelte": "^5.35.5",
+    "svelte": "^5.53.5",
     "svelte-check": "^4.2.2",
     "typescript": "~5.8.3",
-    "vite": "^7.0.4"
+    "vite": "^7.0.8"
   },
   "dependencies": {
     "@types/node": "^24.1.0",
-    "axios": "^1.11.0"
+    "axios": "^1.13.5"
   }
 }
